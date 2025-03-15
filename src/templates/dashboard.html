@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockMaster</title>
+    <link rel="stylesheet" href="path/to/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css')}}">
+    <script src="https://kit.fontawesome.com/bb47d33f1a.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo"></div>
+        <ul class="menu">
+            <li class="active">
+                <a href="/dashboard">
+                    <i class="fa-solid fa-table-columns" style="color: rgb(255, 213, 0);"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="logout">
+                <a href="/">
+                    <i class="fa-solid fa-right-from-bracket" style="color: rgb(255, 213, 0);"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Alert every time the dashboard is loaded -->
+    {% if reorder_stock > 0 %}
+    <script>
+        alert("REORDER POINT ALERT");
+        alert("NEED TO RESTOCK: ({{ reorder_stock }}) product/s reached or are below reorder point.");
+    </script>
+    {% endif %}
+
+    <section class="main">
+        <div class="main-top">
+            <h1>StockMaster</h1>
+        </div>
+            <div class="main-body">
+                <div class="search_bar">
+                    <input type="text" id="search-bar" placeholder="Search products here">
+                </div>
+            </div>
+
+            <!-- Searched Items Modal -->
+            <div class="modal fade" id="searchedModal" tabindex="-1" role="dialog" aria-labelledby="searchedModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="unavailableModalLabel">Searched Items</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <h4>LIST OF ALL SEARCHED PRODUCTS</h4>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ProductID</th>
+                                            <th>Name</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                            <th>Reorder Point</th>
+                                            <th>ReorderQuantity</th>
+                                            <th>Status</th>
+                                            <th>Manage</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="searched-products">
+                                        </tbody>
+                                </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-skills">
+                <div class="card">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <h3>{{ products|length }}</h3>
+                    <h4>PRODUCTS</h4>
+                    <button class="view-btn" data-toggle="modal" data-target="#productsModal">View</button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="productsModal" tabindex="-1" role="dialog" aria-labelledby="productsModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="productsModalLabel">Product Details</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <h4>LIST OF ALL AVAILABLE PRODUCTS</h4>
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th>ProductID</th>
+                                                <th>Product Name</th>
+                                                <th>Price</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for product in products %}
+                                            <tr data-id="{{product.id}}" data-name="{{product.name}}" data-price="{{product.unit_price}}">
+                                                <td>{{ product.id }}</td>
+                                                <td>{{ product.name }}</td>
+                                                <td>{{ product.unit_price }}</td>
+                                            </tr>
+                                            {% endfor %}    
+                                            </tbody>
+                                        </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <i class="fa-solid fa-circle-down"></i>
+                    <h3>{{ low_stock }}</h3>
+                    <h4>LOW IN STOCKS</h4>
+                    <button class="view-btn" data-toggle="modal" data-target="#lowStocksModal">View</button>
+                    <!-- Low in Stocks Modal -->
+                    <div class="modal fade" id="lowStocksModal" tabindex="-1" role="dialog" aria-labelledby="lowStocksModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="lowStocksModalLabel">Low in Stocks</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <h4>PRODUCTS THAT ARE LOW IN STOCKS</h4>
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th>ProductID</th>
+                                                <th>Product Name</th>
+                                                <th>Stock</th>
+                                                <th>Reorder Point</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for product in products %}
+                                                {% if product.reorder_point < product.qty_in_stock and product.qty_in_stock <= (product.reorder_point + 10) %}
+                                                    <tr data-id="{{ product.id }}" data-name="{{ product.name }}" data-stock="{{ product.qty_in_stock }}" data-rop="{{ product.reorder_point }}">
+                                                        <td>{{ product.id }}</td>
+                                                        <td>{{ product.name }}</td>
+                                                        <td>{{ product.qty_in_stock }}</td>
+                                                        <td>{{ product.reorder_point }}</td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <h3>{{ reorder_stock }}</h3>
+                    <h4>NEED TO RE-ORDER</h4>
+                    <button class="view-btn" data-toggle="modal" data-target="#reorderModal">View</button>
+                    <!-- Need to Reorder Modal -->
+                    <div class="modal fade" id="reorderModal" tabindex="-1" role="dialog" aria-labelledby="reorderModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="reorderModalLabel">Need to Re-order</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <h4>PRODUCTS THAT YOU NEED TO RE-ORDER</h4>
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th>ProductID</th>
+                                                <th>Product Name</th>
+                                                <th>Re-order Point</th>
+                                                <th>Stock</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for product in products %}
+                                                {% if product.qty_in_stock <= product.reorder_point %}
+                                                    <tr data-id="{{ product.id }}" data-name="{{ product.name }}" data-stock="{{ product.qty_in_stock }}" data-rop="{{ product.reorder_point }}">
+                                                        <td>{{ product.id }}</td>
+                                                        <td>{{ product.name }}</td>
+                                                        <td>{{ product.reorder_point }}</td>
+                                                        <td>{{ product.qty_in_stock }}</td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    <h3>{{ out_of_stock }}</h3>
+                    <h4>UNAVAILABLE ITEMS</h4>
+                    <button class="view-btn" data-toggle="modal" data-target="#unavailableModal">View</button>
+                    <!-- Unavailable Items Modal -->
+                    <div class="modal fade" id="unavailableModal" tabindex="-1" role="dialog" aria-labelledby="unavailableModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="unavailableModalLabel">Unavailable Items</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <h4>LIST OF UNAVAILABLE/DISCONTINUED PRODUCTS</h4>
+                                        <table class="table">
+                                            <thead>
+                                            <tr>
+                                                <th>ProductID</th>
+                                                <th>Product Name</th>
+                                                <th>Last Restock</th>
+                                                <th>Stock</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for product in products %}
+                                                {% if product.qty_in_stock <= 0 %}
+                                                    <tr data-id="{{ product.id }}" data-name="{{ product.name }}" data-stock="{{ product.qty_in_stock }}" data-rop="{{ product.restock_date }}">
+                                                        <td>{{ product.id }}</td>
+                                                        <td>{{ product.name }}</td>
+                                                        <td>{{ product.restock_date }}</td>
+                                                        <td>{{ product.qty_in_stock }}</td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <section class="attendance">
+            <div class="attendance-list">
+                <h2>List of Products</h2>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>ProductID</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Reorder Point</th>
+                        <th>ReorderQuantity</th>
+                        <th>Last Restock</th>
+                        <th>Status</th>
+                        <th>Manage</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr data-id={{product.id}} data-name={{product.name}} data-unit_price={{product.unit_price}} data-qty_in_stock={{product.qty_in_stock}} data-reorder_point={{product.reorder_point}} data-reorder_quantity={{product.reorder_quantity}} data-restock_date={{product.restock_date}}>
+                            <td>{{product.id}}</td>
+                            <td>{{product.name}}</td>
+                            <td>{{product.unit_price}}</td>
+                            <td>{{product.qty_in_stock}}</td>
+                            <td>{{product.reorder_point}}</td>
+                            <td>{{product.reorder_quantity}}</td>
+                            <td>{{product.restock_date}}</td>
+                                {% if product.qty_in_stock < 1 %}
+                                <td>OUT OF STOCK</td>
+                                {% elif product.qty_in_stock > (product.reorder_point + 10) %}
+                                <td>AVAILABLE</td>
+                                {% elif product.qty_in_stock >= product.reorder_point %}
+                                <td>LOW ON STOCKS</td>
+                                {% else %}
+                                <td>NEED TO REORDER</td>
+                                {% endif %}
+                            <td>
+                                <div data-id={{product.id}} class="btn-group">
+                                    <button class="btn btn-sm btn-primary edit-user-btn">Edit</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button id="addRowBtn" class="btn btn-primary">Add Row</button>
+            </div>
+        </section>
+    </section>
+
+    <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document"> 
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">Edit Status</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h4>Add New Product</h4>
+                    <form id="productForm" action="/add" method="POST">
+                        <label for="addName">Name:      </label>
+                        <input type="text" id="addName" name="name" required><br>
+
+                        <label for="addPrice">Price:      </label>
+                        <input type="number" id="addPrice" name="unit_price" min="1" step="0.01" value="0"><br>
+
+                        <label for="addStock">Stock:      </label>
+                        <input type="number" id="addStock" name="qty_in_stock" min="0" value="0"><br>
+
+                        <label for="addReorderPoint">Reorder Point:      </label>
+                        <input type="number" id="addReorderPoint" name="reorder_point" min="0" value="0"><br>
+
+                        <label for="addReorderQuantity">Reorder Quantity:      </label>
+                        <input type="number" id="addReorderQuantity" name="reorder_quantity" min="0" value="0"><br>
+
+                        <label for="addRestockDate">Restock Date:      </label>
+                        <input type="date" id="addRestockDate" name="restock_date"><br>
+                        
+                        <label for="addLeadTime">Lead Time:      </label>
+                        <input type="number" id="addLeadTime" name="lead_time" min="0" value="0"><br>
+                        
+                        <h4>Additional Data (Optional)</h4>               
+                        <label for="setup_cost">Setup Cost: </label>
+                        <input type="number" id="setup_cost" name="setup_cost" min="0" step="0.01" value="0"><br>
+                        
+                        <label for="ordering_cost">Cost per unit: </label>
+                        <input type="number" id="ordering_cost" name="ordering_cost" min="0" step="0.01" value="0"><br>
+                        
+                        <label for="holding_cost">Holding Cost: </label>
+                        <input type="number" id="holding_cost" name="holding_cost" min="0" step="0.01" value="0"><br>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id="add-product-btn" type="submit" class="btn btn-primary">Add Product</button>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+    <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document"> 
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel">Edit Product</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h4>Product Information</h4>
+                    <form id="update-form" action="/update" method="POST">
+                        <label for="productId">Product ID: </label>
+                        <input type="text" id="productId" name="product_id" readonly><br>
+
+                        <label for="updateName">Product Name:      </label>
+                        <input type="text" id="updateName" name="name"><br>
+
+                        <label for="updatePrice">Price:      </label>
+                        <input type="number" id="updatePrice" name="price" step="0.01" min="0" value="0"><br>
+                        
+                        <label for="updateStock">Stocks:      </label>
+                        <input type="number" id="updateStock" name="stock" min="0" value="0"><br>
+                
+                        <label for="updateROP">Reorder Point:      </label>
+                        <input type="number" id="updateROP" name="rop" min="0" value="0"><br>
+                        
+                        <label for="updateROQ">Reorder Quantity:      </label>
+                        <input type="number" id="updateROQ" name="roq" min="0" value="0"><br>
+                    </form>
+                    
+                    <h4>Optimize Reorder Quantity</h4>
+                    <form id="optimize-form" action="/optimize" method="POST">
+                        <label for="total_demand">Demand: </label>
+                        <input type="number" id="total_demand" name="total_demand" min="0" value="0"><br>
+                        
+                        <label for="setup_cost">Setup Cost: </label>
+                        <input type="number" id="setup_cost" name="setup_cost" step="0.01" min="0" value="0"><br>
+
+                        <label for="ordering_cost">Cost per unit: </label>
+                        <input type="number" id="ordering_cost" name="ordering_cost" step="0.01" min="0" value="0"><br>
+
+                        <label for="holding_cost">Holding Cost: </label>
+                        <input type="number" id="holding_cost" name="holding_cost" step="0.01" min="0" value="0"><br>
+
+                        <label for="lead_time">Lead Time:      </label>
+                        <input type="number" id="lead_time" name="lead_time" min="0" value="0"><br>
+                        
+                        <button type="submit" class="btn btn-secondary">Optimize</button>
+                        
+                        <div id="results" style="display:none;">
+                            <h4>Optimization Results</h4>
+                            <p id="optimized-rop"></p>
+                            <p id="optimized-roq"></p>
+                            <p id="total-cost"></p>
+                            <p id="iterations"></p>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="delete-product-btn" class="btn btn-secondary" data-dismiss="modal">Delete Item</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="save-changes-btn" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        $(document).ready(function () {
+
+            $('#addRowBtn').click(function () {
+                $('#addProductModal').modal('show');
+            });
+
+            $('.modal-footer .btn-secondary:first-of-type').click(function () {
+                // Find the closest row element and remove it
+                $(this).closest('tr').remove();
+            });
+        });
+
+        $('#editUserModal').on('hidden.bs.modal', function (e) {
+            // Hide results
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('optimized-rop').textContent = '';
+            document.getElementById('total-cost').textContent = '';
+            document.getElementById('iterations').textContent = '';
+        });
+
+        $(document).ready(function() {
+            $('#search-bar').on('keypress', function(e) {
+                if (e.which == 13) {
+                    var query = $(this).val();
+                    $.ajax({
+                        url: '/search',
+                        type: 'GET',
+                        data: { query: query },
+                        success: function(data) {
+                            var tbody = $('#searched-products');
+                            tbody.empty();
+                            if (data.length > 0) {
+                                data.forEach(function(product) {
+                                    var status = '';
+                                    if (product.qty_in_stock < 1) {
+                                        status = 'OUT OF STOCK';
+                                    } else if (product.qty_in_stock > (product.reorder_point + 10)) {
+                                        status = 'AVAILABLE';
+                                    } else if (product.qty_in_stock >= product.reorder_point) {
+                                        status = 'LOW ON STOCKS';
+                                    } else {
+                                        status = 'NEED TO REORDER';
+                                    }
+
+                                    var row = `<tr data-id=${product.id} data-name=${product.name} data-unit_price=${product.unit_price} data-qty_in_stock=${product.qty_in_stock} data-reorder_point=${product.reorder_point} data-reorder_quantity=${product.reorder_quantity} data-restock_date=${product.restock_date}>
+                                                <td>${product.id}</td>
+                                                <td>${product.name}</td>
+                                                <td>${product.unit_price}</td>
+                                                <td>${product.qty_in_stock}</td>
+                                                <td>${product.reorder_point}</td>
+                                                <td>${product.reorder_quantity}</td>
+                                                <td>${status}</td>
+                                                <td>
+                                                    <div data-id=${product.id} class="btn-group">
+                                                        <button class="btn btn-sm btn-primary edit-user-btn">Edit</button>
+                                                    </div>
+                                                </td>
+                                            </tr>`;
+                                    tbody.append(row);
+                                });
+                            } else {
+                                tbody.append('<tr><td colspan="9">No results found</td></tr>');
+                            }
+                            $('#searchedModal').modal('show');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='dashboard.js')}}"></script>
+</body>
+</html>

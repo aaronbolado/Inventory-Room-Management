@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockMaster</title>
+    <link rel="stylesheet" href="path/to/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tnc.css')}}">
+</head>
+
+<body>
+    <header>
+        <h2 class="logo">StockMaster</h2>
+        <nav class="navigation">
+            <a href="/">Home</a>
+            <a href="/tnc">Terms & Conditions</a>
+            <button class="btnLogin">Get Started</button>
+        </nav>
+    </header>
+
+    <section class="terms-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <h3>Terms & Conditions</h3>
+                    <div class="terms-content">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla convallis libero ac quam 
+                           consectetur, nec consequat dui tincidunt. Integer id nisi urna. Quisque nec tortor sed 
+                           lorem bibendum interdum. Proin ut orci pretium, accumsan turpis at, posuere velit. Morbi 
+                           molestie felis nec libero aliquam, at iaculis sem molestie. Aliquam erat volutpat. Donec 
+                           ac dictum libero. Vivamus auctor, ex ut interdum blandit, arcu odio efficitur est, non 
+                           scelerisque lacus mi sit amet justo.</p>
+                        <p>Integer pharetra elementum consequat. Nam ac felis eget felis maximus feugiat vel eu 
+                           sapien. Nulla facilisi. In porttitor purus justo, eget vestibulum tortor posuere at. 
+                           Aliquam fringilla dolor at diam commodo, at iaculis nulla pharetra. Nullam mollis libero 
+                           vel sollicitudin feugiat. Cras in ipsum eros.</p>
+                        <p>Etiam scelerisque ipsum eget dui pellentesque, id euismod neque ultricies. Vestibulum 
+                           dignissim, ligula nec consequat mattis, elit lacus congue sapien, vel bibendum urna 
+                           augue et diam. Aenean consequat, mi et posuere sollicitudin, velit justo fermentum 
+                           magna, nec efficitur odio quam quis turpis. Mauris eget faucibus lectus. Nulla at nisl 
+                           eget libero blandit fermentum. Quisque tristique est ac eros suscipit, ac pellentesque 
+                           elit sodales. Duis tincidunt, dolor a feugiat finibus, metus ipsum posuere mi, at 
+                           consequat risus lorem eget libero. Mauris efficitur purus id velit laoreet, nec 
+                           malesuada eros malesuada.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='tnc.js')}}"></script>
+</body>
+
+</html>
